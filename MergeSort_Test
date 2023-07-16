@@ -1,0 +1,191 @@
+#include <iostream>
+#include <chrono>
+
+using namespace std;
+using namespace std::chrono;
+
+void join(int arr[], int left[], int right[], //part of generate worst case function
+    int l, int m, int r)
+{
+    int i; 
+    for (i = 0; i <= m - l; i++)
+        arr[i] = left[i];
+
+    for (int j = 0; j < r - m; j++)
+        arr[i + j] = right[j];
+}
+
+void split(int arr[], int left[], int right[], //part of generate worst case function
+    int l, int m, int r)
+{
+    for (int i = 0; i <= m - l; i++)
+        left[i] = arr[i * 2];
+
+    for (int i = 0; i < r - m; i++)
+        right[i] = arr[i * 2 + 1];
+}
+
+void generateWorstCase(int arr[], int l, int r)   //Function to generate worst case list
+{
+    if (l < r)
+    {
+        int m = l + (r - l) / 2;
+
+        
+        int left[m - l + 1];
+        int right[r - m];
+
+        
+        split(arr, left, right, l, m, r);
+
+       
+        generateWorstCase(left, l, m);
+        generateWorstCase(right, m + 1, r);
+
+       
+        join(arr, left, right, l, m, r);
+    }
+}
+void build_S_List(int arr[], int size)      //Builds sorted list (best case)
+{
+    for (int i = 1; i <= size; i++)
+    {
+        arr[i - 1] = i;
+    }
+}
+   
+void build_Rand_List(int arr[], int size)     //Builds random list (average case)
+{
+    for (int i = 0; i < size; i++) {
+        arr[i] = rand() % size;
+    }
+}
+
+void build_A_List(int arr[], int size)      //Builds alternating list (worst case)
+{
+    for (int i = 1; i <= size; i++) {
+        arr[i - 1] = i;
+    }
+    generateWorstCase(arr, 0, size - 1);
+}
+
+void merge(int array[], int left, int mid, int right)   //mergesort algorithm
+{
+    int subArrayOne = mid - left + 1;
+    int subArrayTwo = right - mid;
+
+    int* leftArray = new int[subArrayOne];
+    int* rightArray = new int[subArrayTwo];
+
+    for (int i = 0; i < subArrayOne; i++)
+    {
+        leftArray[i] = array[left + i];
+    }
+    for (int j = 0; j < subArrayTwo; j++)
+    {
+        rightArray[j] = array[mid + 1 + j];
+    }
+
+    int i_One = 0;
+    int i_Two = 0;
+    int i_Merged = left;
+
+    while (i_One < subArrayOne && i_Two < subArrayTwo)
+    {
+        if (leftArray[i_One] <= rightArray[i_Two])
+        {
+            array[i_Merged] = leftArray[i_One];
+            i_One++;
+        }
+        else
+        {
+            array[i_Merged] = rightArray[i_Two];
+            i_Two++;
+        }
+        i_Merged++;
+    }
+    while (i_One < subArrayOne)
+    {
+        array[i_Merged] = leftArray[i_One];
+        i_One++;
+        i_Merged++;
+    }
+    while (i_Two < subArrayTwo)
+    {
+        array[i_Merged] = rightArray[i_Two];
+        i_Two++;
+        i_Merged++;
+    }
+    delete[] leftArray;
+    delete[] rightArray;
+}
+
+void mergeSort(int array[], int left, int right)    //mergesort algorithm
+{
+    if (left >= right)
+    {
+        return;
+    }
+    int mid = (left + right) / 2;
+    mergeSort(array, left, mid);
+    mergeSort(array, mid + 1, right);
+    merge(array, left, mid, right);
+}
+
+void printList(int arr[], int size)     //Print function for testing 
+{
+    for (int i = 0; i < size; i++)
+    {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+}
+int main()
+{
+
+    for (int size = 100; size <= 100000; size *= 10) {       //Loop that increases input size by factor of 10 each iteration
+
+        cout << "Using Merge sort with lists of " << size << " elements" << endl << endl;
+
+        int* M_sorted = new int[size];      //Creates array.
+        build_S_List(M_sorted, size);       //Builds list to fill array.
+        cout << "List is sorted: ";
+        auto M_sorted_start = high_resolution_clock::now();
+        mergeSort(M_sorted, 0, size - 1);       //Calls merge sort.
+        auto M_sorted_stop = high_resolution_clock::now();
+        auto M_sorted_duration = duration_cast<milliseconds>(M_sorted_stop - M_sorted_start);       //Records and outputs running time.
+        cout <<  M_sorted_duration.count() << " millisecond(s)" << endl;
+        delete[] M_sorted;
+
+        int* M_rand_sorted = new int[size];
+        build_Rand_List(M_rand_sorted, size);
+        cout << "List is random: ";
+        auto M_rand_sorted_start = high_resolution_clock::now();
+        mergeSort(M_rand_sorted, 0, size - 1);
+        auto M_rand_sorted_stop = high_resolution_clock::now();
+        auto M_rand_sorted_duration = duration_cast<milliseconds>(M_rand_sorted_stop - M_rand_sorted_start);
+        cout << M_rand_sorted_duration.count() << " millisecond(s)" << endl;
+        delete[] M_rand_sorted;
+
+        int* M_reversed = new int[size];
+        build_A_List(M_reversed, size);
+        cout << "List is alternating: ";
+        auto M_reversed_start = high_resolution_clock::now();
+        mergeSort(M_reversed, 0, size - 1);
+        auto M_reversed_stop = high_resolution_clock::now();
+        auto M_reversed_duration = duration_cast<milliseconds>(M_reversed_stop - M_reversed_start);
+        cout << M_reversed_duration.count() << " millisecond(s)" << endl;
+        delete[] M_reversed;
+
+        cout << endl;
+    }
+
+    char quit = '\0';
+
+    while (!quit) {
+        cout << "Enter any key to quit: ";
+        cin >> quit;
+    }
+
+    return 0;
+}
