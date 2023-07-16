@@ -1,0 +1,178 @@
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
+#include <iostream>
+#include <numeric>
+#include <random>
+#include <stdint.h>
+#include <sys/types.h>
+
+/** generateList
+ * will generate a list from 0 to the vector size
+ * @params std::vector
+ * @return void
+ */
+void generateList(std::vector<int> *vec) {
+  std::iota(vec->begin(), vec->end(), 0);
+}
+
+/** swap
+ * will swap two elements in a vector at index i and index j
+ * @params std::vector inputArr, int i, int j
+ * @return void
+ */
+void swap(std::vector<int> *inputArr, int i, int j) {
+  int temp = inputArr->at(i);
+  inputArr->at(i) = inputArr->at(j);
+  inputArr->at(j) = temp;
+  return;
+}
+
+/** partition
+ * will split the array from the left array being less than or equal
+ * the partition index and right array being greater than the partition index
+ * @params std::vector inputArr, int start, int end, unsigned long long int
+ * counter
+ * @return partition index
+ */
+int partition(std::vector<int> *inputArr, int start, int end,
+              uint64_t &counter) {
+  int pivot = inputArr->at(start);
+  int i = start + 1;
+  for (int j = start + 1; j <= end; j++) {
+    counter++;
+    if (inputArr->at(j) <= pivot) {
+      swap(inputArr, i, j);
+      i++;
+    }
+  }
+  swap(inputArr, i - 1, start);
+  return i - 1;
+}
+/** quickSort
+ * will recursively call itself and partition itself to sort the vector
+ * @params std::vector inputArr, int start, int end, unsigned long long int
+ * counter
+ * @return void
+ */
+
+void quickSort(std::vector<int> *inputArr, int start, int end,
+               uint64_t &counter) {
+  if (start < end) {
+    int partitionVal = partition(inputArr, start, end, counter);
+    quickSort(inputArr, start, partitionVal - 1, counter);
+    quickSort(inputArr, partitionVal + 1, end, counter);
+  }
+}
+/** printQuickSortTime
+ * will print the time the quick sort function has taken
+ * by using std::chrono
+ * @params std::vector inputArr, int size, std::string time timeComplexity,
+ * unsigned long long int counter
+ * @return void
+ */
+void printQuickSortTime(std::vector<int> *vec, int size,
+                        const std::string &timeComplexity, uint64_t &counter) {
+  std::chrono::steady_clock::time_point begin =
+      std::chrono::steady_clock::now();
+  quickSort(vec, 0, size - 1, counter);
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::cout << timeComplexity << " Case with size: " << size << " is "
+            << std::chrono::duration<double>(end - begin).count() << "s"
+            << std::endl;
+  std::cout << "#Comp " << counter << '\n';
+}
+/** generateQuickSortBestCase
+ * will generate the best case for quick sort by swapping the first index with
+ * the middle so the array will be evenly split after each partition call
+ * @params std::vector inputArr, int start, int end
+ * @return void
+ */
+
+void generateQuickSortBestCase(std::vector<int> *inputArr, int start, int end) {
+  int amount = end - start;
+  if (amount >= 3) {
+    int mid = (end + start) / 2;
+    generateQuickSortBestCase(inputArr, start, mid);
+    swap(inputArr, start, mid);
+    generateQuickSortBestCase(inputArr, mid + 1, end);
+  }
+}
+/** testWorstCaseQuickSort
+ * will test the worst case by creating a new vector and
+ * printQuickSortTime to get its time
+ * @params int size, unsigned long long int counter
+ * @return void
+ */
+
+void testWorstCaseQuickSort(int size, uint64_t &counter) {
+  std::vector<int> *vec = new std::vector<int>(size);
+  generateList(vec);
+  printQuickSortTime(vec, size, "Worst", counter);
+  delete vec;
+}
+
+/** testAverageCaseQuickSort
+ * will test the average case by creating a new vector and shuffling the values
+ * then it will call printQuickSortTime to get its time
+ * @params int size, unsigned long long int counter
+ * @return void
+ */
+
+void testAverageCaseQuickSort(int size, uint64_t &counter) {
+  std::random_device rd;
+  std::mt19937 g(rd());
+  std::vector<int> *vec = new std::vector<int>(size);
+  generateList(vec);
+  std::shuffle(vec->begin(), vec->end(), g);
+  printQuickSortTime(vec, size, "Average", counter);
+  delete vec;
+}
+/** testBestCaseQuickSort
+ * will test the best case by creating a new vector and calling
+ * generateQuickSortBestCase then it will call printQuickSortTime to get its
+ * time
+ * @params int size, unsigned long long int counter
+ * @return void
+ */
+
+void testBestCaseQuickSort(int size, uint64_t &counter) {
+  std::vector<int> *vec = new std::vector<int>(size);
+  generateList(vec);
+  generateQuickSortBestCase(vec, 0, size - 1);
+  printQuickSortTime(vec, size, "Best", counter);
+  delete vec;
+}
+
+/** resetCounter
+ * will reset the parameter passed in to 0
+ * @params unsigned long long int counter
+ * @return void
+ */
+void resetCounter(uint64_t &counter) { counter = 0; }
+
+/** main
+ * will loop through and test worst best and average case of quicksort
+ * @return int
+ */
+
+int main() {
+  int size = 100;
+  for (int i = size; i < 1000000000; i *= 10) {
+    uint64_t counter = 0;
+    if (i <= 1000000) {
+      testBestCaseQuickSort(i, counter);
+      resetCounter(counter);
+      testWorstCaseQuickSort(i, counter);
+      resetCounter(counter);
+      testAverageCaseQuickSort(i, counter);
+      resetCounter(counter);
+    } else {
+      testBestCaseQuickSort(i, counter);
+      resetCounter(counter);
+      testAverageCaseQuickSort(i, counter);
+      resetCounter(counter);
+    }
+  }
+  return 0;
+}
