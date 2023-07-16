@@ -1,0 +1,189 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+#include <time.h>
+
+using namespace std;
+using namespace std::chrono;
+
+
+void bruteForceSum(int arr[], int n, int x) {
+    for (int i = 0; i < n; i++) {
+        for (int j = i+1; j < n; j++) {
+            if (arr[i] + arr[j] == x) {
+                cout << arr[i] << " + " << arr[j] << " = " << x << endl;
+            }
+        }
+    }
+}
+
+
+
+void insertionSort(int arr[], int n) {
+    for (int p = 0; p < n-1; p++) { // p for PIVOT
+        int k = p + 1;              // k = index after pivot
+        while (true) {
+            if (arr[k] < arr[k-1]) {//
+                int temp = arr[k];  // SWAP value at k with value at k-1
+                arr[k] = arr[k-1];  //
+                arr[k-1] = temp;    //
+            }
+            else {
+                break;              // BREAK FROM WHILE LOOP if arr
+            }
+            k--;                    //
+        }
+    }
+}
+void radixCountSort(int arr[], int n, int digit) {
+    // AUX ARRAY HOLDING DIGITS OF 0 - 9
+    int aux[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int output[n];
+
+    // MODULE VALUE
+    for (int i = 0; i < n; i++) {
+        aux[(arr[i] / digit) % 10]++;
+    }
+
+    // SUMMATION
+    for (int i = 1; i < 10; i++) {
+        aux[i] += aux[i - 1];
+    }
+
+    // Create an Ordered Output array
+    for (int i = n-1; i >= 0; i--) {
+        output[aux[(arr[i]/digit) % 10] - 1] = arr[i];
+        aux[(arr[i]/digit) % 10]--;
+    }
+
+    // Change our array into ordered output array
+    for (int i = 0; i < n; i++) {
+        arr[i] = output[i];
+    }
+}
+void radixSort(int arr[], int n) {
+    int mE = arr[0];                // mE = max element, first index as placeholder for now unless it actually is max
+    for (int i = 1; i < n; i++) {   // Loop Whole Array
+        if (mE < arr[i]) {          // change mE if arr[i] is greater
+            mE = arr[i];
+        }
+    }
+    for (int digit = 1; mE / digit > 0; digit *= 10) { // Loop dependent on the number of places in the greatest digit
+        radixCountSort(arr, n, digit);
+    }
+}
+
+void random_list(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 1000;
+    }
+}
+void reverse_list(int arr[], int n) {
+    int x = n;
+    for (int i = 0; i < n; i++) {
+        arr[i] = x;
+        x--;
+    }
+}
+void ordered_list(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        arr[i] = i;
+    }
+}
+void single_digit(int arr[], int n) {
+    int x = 1;
+    for (int i = 0; i < n; i++) {
+        arr[i] = x;
+        x = (x+1)%10;
+    }
+}
+void single_digit_outlier(int arr[], int n) {
+    int x = 1;
+    arr[0] = 100000;
+    for (int i = 1; i < n; i++) {
+        arr[i] = x;
+        x = (x+1)%10;
+    }
+}
+void three_digit_same_digit(int arr[], int n) {
+    int x = 100;
+    for (int i = 0; i < n; i++) {
+        arr[i] = x;
+        x = (x+10)%1000;
+    }
+}
+
+
+int main()
+{
+    srand(time(NULL));
+
+    cout << "Insertion Sort Tests: " << "\n" << endl;
+    for (int size = 100; size < 1000000; size *= 10) {
+        int* arr = new int[size];
+        reverse_list(arr, size);
+        //for (int i =0; i < size; i++) {
+        //    cout << reverseList[i] << " ";
+        //}
+        cout << "Reverse List(at size " << size << ") ";
+        auto r_start = high_resolution_clock::now();
+        insertionSort(arr, size);
+        auto r_stop = high_resolution_clock::now();
+        auto rduration = duration_cast<milliseconds>(r_stop - r_start);
+        cout << rduration.count() << " milliseconds" << endl;
+
+        arr = new int[size];
+        random_list(arr, size);
+        cout << "Random List(at size " << size << ") ";
+        auto a_start = high_resolution_clock::now();
+        insertionSort(arr, size);
+        auto a_stop = high_resolution_clock::now();
+        auto aduration = duration_cast<milliseconds>(a_stop - a_start);
+        cout << aduration.count() << " milliseconds" << endl;
+
+        arr = new int[size];
+        ordered_list(arr, size);
+        cout << "Ordered List(at size " << size << ") ";
+        auto sorted_start = high_resolution_clock::now();
+        insertionSort(arr, size);
+        auto sorted_stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(sorted_stop - sorted_start);
+        cout << duration.count() << " milliseconds" << endl << endl;
+    }
+    cout << endl;
+
+////-----------------------------------------------------------------------------------------------------------------------------
+    cout << "Radix Sort Tests: " << "\n" << endl;
+    for (int size = 100; size < 1000000; size *= 10) {
+        int* arr = new int[size];
+        single_digit(arr, size);
+        cout << "Single Digit List(at size " << size << ") ";
+        auto rr_start = high_resolution_clock::now();
+        radixSort(arr, size);
+        auto rr_stop = high_resolution_clock::now();
+        auto rrduration = duration_cast<milliseconds>(rr_stop - rr_start);
+        cout << rrduration.count() << " milliseconds" << endl;
+
+        arr = new int[size];
+        single_digit_outlier(arr, size);
+        cout << arr[0] << " " << arr[1] << " " << arr[2] << " " << arr[3] << endl;
+        cout << "One Outlier(at size " << size << ")       ";
+        auto ra_start = high_resolution_clock::now();
+        radixSort(arr, size);
+        auto ra_stop = high_resolution_clock::now();
+        auto raduration = duration_cast<milliseconds>(ra_stop - ra_start);
+        cout << raduration.count() << " milliseconds" << endl;
+
+        arr = new int[size];
+        three_digit_same_digit(arr, size);
+        cout << "Three Digit List(at size " << size << ")  ";
+        auto rsorted_start = high_resolution_clock::now();
+        radixSort(arr, size);
+        auto rsorted_stop = high_resolution_clock::now();
+        auto rduration = duration_cast<milliseconds>(rsorted_stop - rsorted_start);
+        cout << rduration.count() << " milliseconds" << endl << endl;
+    }
+    cout << endl;
+    system("pause");
+    return 0;
+}
