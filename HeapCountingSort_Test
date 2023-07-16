@@ -1,0 +1,317 @@
+#include <iostream>
+#include <chrono>
+#include <cstdlib>
+#include <time.h>
+using namespace std;
+using namespace std::chrono;
+
+class Heap {
+public:
+    //Heap();
+
+    void printArray(int Arr[], int n) {         //Max Heap
+        for (int i = 0; i < n; i++)
+            cout << Arr[i] << " ";
+        cout << endl;
+    }
+
+    void modifyValMax(int Arr[], int n, int i, int key) {       //Modify value (HEAP-INCREASE-KEY)
+        if (key < Arr[i]) {
+            cout << "New key is smaller than current key. Exiting program. ";
+            exit(1);
+        }
+        Arr[i] = key;
+        while (i > 0 && Arr[i / 2] < Arr[i]) {
+            swap(Arr[i], Arr[i / 2]);
+            i = i / 2;
+        }
+    }
+
+    void insert_value_maxHeap(int Arr[], int val, int& n) {     //Adds value at the end of array and calls max_heapify
+        n = n + 1;
+        Arr[n - 1] = val;
+        modifyValMax(Arr, n, n - 1, val);
+        ascendingHeapSort(Arr, n);
+    }
+
+    void max_heapify(int Arr[], int i, int n) {         //Maintains the max heap property
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        int largest = i, temp;
+        if (l < n && Arr[l] > Arr[largest]) {
+            largest = l;
+        }
+        if (r < n && Arr[r] > Arr[largest])
+            largest = r;
+        if (largest != i) {
+            temp = Arr[largest];
+            Arr[largest] = Arr[i];
+            Arr[i] = temp;
+            max_heapify(Arr, largest, n);
+        }
+    }
+
+    int extract_maximum(int Arr[], int& n) {        //Return the maximum element in heap and swap last element with first element
+        if (n < 1) {
+            cout << "Heap underflow! Exiting program.";
+            exit(1);
+        }
+        int max = Arr[n - 1];
+        n--;
+        max_heapify(Arr, n - 1, 0);
+        return max;
+    }
+
+    void ascendingHeapSort(int Arr[], int n) {      //Prints the array in ascending order
+        buildMaxHeap(Arr, n);
+
+        for (int i = n - 1; i >= 0; i--) {
+            swap(Arr[0], Arr[i]);
+            max_heapify(Arr, 0, i);
+        }
+    }
+
+    void buildMaxHeap(int Arr[], int n) {   //heapifies entire list (max property)
+        for (int i = n / 2 - 1; i >= 0; i--)
+            max_heapify(Arr, i, n);
+    }
+
+    void modifyValMin(int Arr[], int n, int i, int key) {       //Modify value (HEAP-INCREASE-KEY)
+        if (key < Arr[i]) {
+            cout << "New key is smaller than current key. Exiting program. ";
+            exit(1);
+        }
+        Arr[i] = key;
+        while (i > 0 && Arr[i / 2] < Arr[i]) {
+            swap(Arr[i], Arr[i / 2]);
+            i = i / 2;
+        }
+
+    }
+
+    void insert_value_minHeap(int Arr[], int val, int& n) {  // Adds value at the end of array and calls min_heapify
+        n = n + 1;
+        Arr[n - 1] = val;
+        modifyValMin(Arr, n, n - 1, val);
+        descendingHeapSort(Arr, n);
+    }
+
+    void min_heapify(int Arr[], int i, int n) {        //Maintains min heap property
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+        int smallest = i, temp;
+        if (l < n && Arr[l] < Arr[smallest]) {
+            smallest = l;
+        }
+        if (r < n && Arr[r] < Arr[smallest])
+            smallest = r;
+        if (smallest != i) {
+            swap(Arr[i], Arr[smallest]);
+            min_heapify(Arr, smallest, n);
+        }
+    }
+
+    int extract_minimum(int Arr[], int& n) {        //Return the minimum element in heap and swap last element with first element
+        if (n < 1) {
+            cout << "Heap underflow! Exiting program.";
+            exit(1);
+        }
+        int min = Arr[n - 1];
+        n--;
+        min_heapify(Arr, n, 0);
+        return min;
+    }
+
+    void descendingHeapSort(int Arr[], int n) {    //Prints the array in descending order
+        buildMinHeap(Arr, n);
+
+        for (int i = n - 1; i >= 0; i--) {
+            swap(Arr[0], Arr[i]);
+            min_heapify(Arr, 0, i);
+        }
+    }
+
+    void buildMinHeap(int Arr[], int n) {       //Heapifies entire list (min heap property) 
+        for (int i = n / 2 - 1; i >= 0; i--)
+            min_heapify(Arr, i, n);
+    }
+};
+//TEST FUNCTION SPACE FOR HEAP SORT
+void identical_list(int arr[], int n) {         //List is identical (all elements are the same and best case)
+
+    for (int i = 0; i < n; i++) {
+        arr[i] = 899;
+    }
+}
+
+void random_list(int arr[], int n) {            //List is random (average case)
+
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 100;
+    }
+}
+
+void reverse_list(int arr[], int n) {           //List is in reverse order (worst case) 
+    int x = n;
+    for (int i = 0; i < n; i++) {
+        arr[i] = i;
+        //x--;
+    }
+}
+
+//TEST FUNCTION SPACE FOR COUNTING SORT
+void good_value(int arr[], int n) {             //builds list for best case where k value is not significantly larger than the size
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % n;
+    }
+}
+
+void average_value(int arr[], int n) {          //builds list where the elements in the array are random
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 7;
+    }
+}
+
+void bad_value(int arr[], int n) {              //builds list where k value is significantly larger than the size 
+    for (int i = 0; i < n; i++) {
+        if (i % 10 == 0) {
+            arr[i] = (rand() % 100) + n;
+        }
+        else
+            arr[i] = rand() % 7;
+    }
+}
+
+void CountingSort(int arr[], int n, int max) {      //parameters are: they array, size of array, and maximum value.
+    int* output = new int[n];                       // initializes output array
+    int* aux = new int[max + 1];                    // initializes an aux array to store the count of each value
+    int count, j, x;
+
+    for (int i = 0; i < max + 1; i++) {     // Gets count values and assigns them to aux array
+        count = 0;
+        x = i;
+        for (j = 0; j < n; j++) {
+            if (arr[j] == x) {
+                count++;
+            }
+        }
+        aux[i] = count;
+    }
+
+    for (int i = 0; i < max + 1; i++) {     // cumulatively adds elements in aux array
+        if (i == 0)
+            continue;
+        else {
+            aux[i] = aux[i] + aux[i - 1];
+        }
+    }
+
+    int val;
+    for (int j = n - 1; j >= 0; j--) {      //creates the output array
+        val = arr[j];
+        aux[arr[j]] = aux[arr[j]] - 1;
+        output[aux[arr[j]]] = val;
+    }
+
+    for (int i = 0; i < n; i++)             //copies the output (sorted) into the original array.
+        arr[i] = output[i];
+}
+
+int find_max(int arr[], int n) {
+    int max = arr[0];
+    for (int i = 0; i < n; i++) {
+        if (arr[i] > max)
+            max = arr[i];
+    }
+    return max;
+}
+
+int main()
+{
+    srand(time(NULL));
+    Heap obj;               //creates an object for the heap class.
+
+    cout << "***** Heap Sort *****\n\n\n";
+
+    for (int size = 100; size < 1000000; size *= 10) {              //Heap Sort
+        cout << "Using Heap Sort with array of size: " << size << endl << endl;
+
+        int* BestCase = new int[size];                  //creates the array
+        identical_list(BestCase, size);                 //Builds list to fill the array
+        cout << "The list sorts in (identical array or best case): ";
+        auto sorted_start = high_resolution_clock::now();
+        obj.ascendingHeapSort(BestCase, size);          //calls heap sort to sort the array
+        auto sorted_stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(sorted_stop - sorted_start);        //Records and outputs the running time in milliseconds
+        cout << duration.count() << " milliseconds" << endl << endl;
+        delete[] BestCase;
+
+        int* AverageCase = new int[size];
+        random_list(AverageCase, size);
+        cout << "The list sorts in (random array or average case): ";
+        auto rand_sorted_start = high_resolution_clock::now();
+        obj.ascendingHeapSort(AverageCase, size);
+        auto rand_sorted_stop = high_resolution_clock::now();
+        auto rand_duration = duration_cast<milliseconds>(rand_sorted_stop - rand_sorted_start);
+        cout << rand_duration.count() << " milliseconds" << endl << endl;
+        //obj.printArray(AverageCase, size);
+        delete[] AverageCase;
+
+        int* WorstCase = new int[size];
+        reverse_list(WorstCase, size);
+        cout << "The list sorts in (reverse order or worst case): ";
+        auto reverse_sorted_start = high_resolution_clock::now();
+        obj.descendingHeapSort(WorstCase, size);                        //sorts the list in descending order to trigger worst case
+        auto reverse_sorted_stop = high_resolution_clock::now();
+        auto reverse_duration = duration_cast<milliseconds>(reverse_sorted_stop - reverse_sorted_start);
+        cout << reverse_duration.count() << " milliseconds" << endl << endl;
+        //obj.printArray(WorstCase, size);
+        delete[] WorstCase;
+
+        cout << endl << endl;
+    }
+
+    cout << "***** Counting Sort *****\n\n\n";
+    int max;
+
+    for (int size = 100; size < 1000000; size *= 10) {              //Counting Sort
+        cout << "Using Counting Sort with array of size: " << size << endl << endl;
+
+        int* BestCase = new int[size];
+        good_value(BestCase, size);
+        cout << "The list sorts in (k value not significant than the size or best case): ";
+        auto good_sorted_start = high_resolution_clock::now();
+        max = find_max(BestCase, size);
+        CountingSort(BestCase, size, max);
+        auto good_sorted_stop = high_resolution_clock::now();
+        auto good_duration = duration_cast<milliseconds>(good_sorted_stop - good_sorted_start);
+        cout << good_duration.count() << " milliseconds\n\n";
+        delete[] BestCase;
+
+        int* AverageCase = new int[size];
+        average_value(AverageCase, size);
+        cout << "The list sorts in (random array or average case): ";
+        auto average_sorted_start = high_resolution_clock::now();
+        max = find_max(AverageCase, size);
+        CountingSort(AverageCase, size, max);
+        auto average_sorted_stop = high_resolution_clock::now();
+        auto average_duration = duration_cast<milliseconds>(average_sorted_stop - average_sorted_start);
+        cout << average_duration.count() << " milliseconds\n\n";
+        delete[] AverageCase;
+
+        int* WorstCase = new int[size];
+        bad_value(WorstCase, size);
+        cout << "The list sorts in (k value more significant than the size or worst case): ";
+        auto bad_sorted_start = high_resolution_clock::now();
+        max = find_max(WorstCase, size);
+        CountingSort(WorstCase, size, max);
+        auto bad_sorted_stop = high_resolution_clock::now();
+        auto bad_duration = duration_cast<milliseconds>(bad_sorted_stop - bad_sorted_start);
+        cout << bad_duration.count() << " milliseconds\n\n";
+        delete[] WorstCase;
+
+        cout << endl << endl;
+    }
+	system("pause");
+    return 0;
+}
